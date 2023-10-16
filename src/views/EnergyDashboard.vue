@@ -13,12 +13,8 @@
         </tr>
       </thead>
       <tbody>
-        <charge-task
-          v-for="(task, index) of taskList"
-          v-bind:key="index"
-          v-model:task="taskList[index]"
-          @update:task="console.log(toRaw(taskList[index]))"
-        ></charge-task>
+        <charge-task v-for="(task, index) of taskList" v-bind:key="index" v-model:task="taskList[index]"
+          @update:task="console.log(toRaw(taskList[index]))"></charge-task>
       </tbody>
     </v-table>
   </div>
