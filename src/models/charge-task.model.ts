@@ -1,12 +1,13 @@
 export type ChargeMode = 'charge' | 'discharge'
 export type Percentage = number
 
-export interface ChargeTaskSetting {
+export interface ChargeTask {
   id: number
   mode: ChargeMode
-  dateRelative: number
-  from: string
-  till: string
+  dateRelative?: number
+  date: Date
+  from: number
+  till: number
   power: number
   target?: number
   holdOff?: Percentage

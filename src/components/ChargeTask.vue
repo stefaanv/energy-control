@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { ChargeMode, ChargeTaskSetting } from '@/models/charge-task-setting.model'
+import { ChargeTaskSetting } from '@/models/charge-task-setting.model'
 import { ref, Ref } from 'vue'
 import { range } from 'radash'
+
+type ZeroToFour = '0' | '1' | '2' | '3' | '4'
+const DAY_NAMES: Record<ZeroToFour, string> = {
+  '0': 'vandaag',
+  '1': 'morgen',
+  '2': 'overmorgen',
+  '3': 'd+3',
+  '4': 'd+4',
+}
 
 const props = defineProps<{
   task: ChargeTaskSetting
@@ -11,47 +20,40 @@ const emit = defineEmits<{
 }>()
 
 const beingEdited: Ref<boolean> = ref(false)
+const edit: Ref<ChargeTaskSetting> = ref(props.task)
 
 const hours = Array.from(range(0, 23))
 const minutes = Array.from(range(0, 11, i => 5 * i))
+const days = Array.from(range(0, 4)).map(rd => ({ key: rd, title: DAY_NAMES[rd.toString() as ZeroToFour] }))
 
-const mode: Ref<ChargeMode> = ref('charge')
-const hourFrom = ref(0)
-const minutesFrom = ref(0)
-const hourTill = ref(0)
-const minutesTill = ref(0)
-const power = ref(0)
+const hourFrom = ref(parseInt(props.task.from.split(':')[0]))
+const minutesFrom = ref(parseInt(props.task.from.split(':')[1]))
+const hourTill = ref(parseInt(props.task.till.split(':')[0]))
+const minutesTill = ref(parseInt(props.task.till.split(':')[1]))
 
 const startEdit = () => {
-  mode.value = props.task.mode as ChargeMode
-  hourFrom.value = parseInt(props.task.from.split(':')[0])
-  minutesFrom.value = parseInt(props.task.from.split(':')[1])
-  hourTill.value = parseInt(props.task.till.split(':')[0])
-  minutesTill.value = parseInt(props.task.till.split(':')[1])
-  power.value = props.task.power
   beingEdited.value = true
 }
 
 const sendUpdate = () => {
-  console.log(power.value)
-  const updatedTask = {
-    ...props.task,
-    mode: mode.value,
-    from: `${hourFrom.value}:${formatMinutes(minutesFrom.value)}`,
-    till: `${hourTill.value}:${formatMinutes(minutesTill.value)}`,
-    power: power.value,
-  }
+  edit.value.from = `${hourFrom.value}:${formatMinutes(minutesFrom.value)}`
+  edit.value.till = `${hourTill.value}:${formatMinutes(minutesTill.value)}`
+  edit.value.power = parseInt(edit.value.power.toString())
   beingEdited.value = false
-  emit('update:task', updatedTask)
+  emit('update:task', edit.value)
 }
+
 
 const formatMinutes = (value: number) => ('0' + value.toString()).slice(-2)
 </script>
 
 <template>
   <tr v-if="beingEdited">
-    <td class="charge-column">
-      <v-select :items="['charge', 'discharge']" density="compact" v-model="mode" />
+    <td class="other-column">
+      <v-select :items="days" density="compact" v-model="edit.dateRelative" item-value="key" item-title="title" />
+    </td>
+    <td class="other-column">
+      <v-select :items="['charge', 'discharge']" density="compact" v-model="edit.mode" />
     </td>
     <td class="time-column">
       <v-layout row>
@@ -65,10 +67,11 @@ const formatMinutes = (value: number) => ('0' + value.toString()).slice(-2)
         <v-select :items="minutes" density="compact" v-model="minutesTill" />
       </v-layout>
     </td>
-    <td><v-text-field type="number" v-model="power" density="compact"></v-text-field></td>
+    <td><v-text-field type="number" v-model="edit.power" density="compact"></v-text-field></td>
     <v-btn @click="sendUpdate">save</v-btn>
   </tr>
   <tr v-else @click="startEdit()">
+    <td>{{ DAY_NAMES[task.dateRelative.toString() as ZeroToFour] }}</td>
     <td>{{ task.mode }}</td>
     <td class="time-column">{{ task.from }}</td>
     <td class="time-column">{{ task.till }}</td>
@@ -80,8 +83,10 @@ const formatMinutes = (value: number) => ('0' + value.toString()).slice(-2)
   min-width: 190px;
   text-align: center;
 }
-.charge-column {
+
+.other-column {
   min-width: 180px;
   text-align: center;
 }
 </style>
+@/models/charge-task.model

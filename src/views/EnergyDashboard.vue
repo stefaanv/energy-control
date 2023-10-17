@@ -3,13 +3,14 @@
     <v-table density="compact">
       <thead>
         <tr>
-          <th class="text-center" colspan="4">Charge/discharge tasks</th>
+          <th class="bold text-center" colspan="4" style="font-weight: 800;">Charge/discharge tasks</th>
         </tr>
         <tr>
-          <th class="text-center">Soort</th>
-          <th class="text-center">Van</th>
-          <th class="text-center">Tot</th>
-          <th class="text-center">Vermogen [W]</th>
+          <th class="text-center" style="font-weight: 800;">Dag</th>
+          <th class="text-center" style="font-weight: 800;">Soort</th>
+          <th class="text-center" style="font-weight: 800;">Van</th>
+          <th class="text-center" style="font-weight: 800;">Tot</th>
+          <th class="text-center" style="font-weight: 800;">Vermogen [W]</th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +37,7 @@ const taskList: Ref<ChargeTaskSetting[]> = ref([
   } as ChargeTaskSetting,
   {
     id: 2,
-    dateRelative: 1,
+    dateRelative: 5,
     mode: 'discharge',
     power: 1200,
     from: '2:00',
@@ -45,8 +46,13 @@ const taskList: Ref<ChargeTaskSetting[]> = ref([
 ])
 </script>
 
-<style>
+<style scoped>
+.bold {
+  font-weight: 900;
+}
+
 .table-container {
-  max-width: 800px;
+  max-width: 1000px;
 }
 </style>
+@/models/charge-task.model
