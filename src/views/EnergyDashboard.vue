@@ -3,19 +3,25 @@
     <v-table density="compact">
       <thead>
         <tr>
-          <th class="bold text-center" colspan="4" style="font-weight: 800;">Charge/discharge tasks</th>
+          <th class="bold text-center" colspan="5" style="font-weight: 800; font-size: larger">
+            Charge/discharge tasks
+          </th>
         </tr>
         <tr>
-          <th class="text-center" style="font-weight: 800;">Dag</th>
-          <th class="text-center" style="font-weight: 800;">Soort</th>
-          <th class="text-center" style="font-weight: 800;">Van</th>
-          <th class="text-center" style="font-weight: 800;">Tot</th>
-          <th class="text-center" style="font-weight: 800;">Vermogen [W]</th>
+          <th class="text-center" style="font-weight: 800">Dag</th>
+          <th class="text-center" style="font-weight: 800">Soort</th>
+          <th class="text-center" style="font-weight: 800">Van</th>
+          <th class="text-center" style="font-weight: 800">Tot</th>
+          <th class="text-center" style="font-weight: 800">Vermogen [W]</th>
         </tr>
       </thead>
       <tbody>
-        <charge-task v-for="(task, index) of taskList" v-bind:key="index" v-model:task="taskList[index]"
-          @update:task="console.log(toRaw(taskList[index]))"></charge-task>
+        <charge-task
+          v-for="(task, index) of taskList"
+          v-bind:key="index"
+          v-model:task="taskList[index]"
+          @update:task="console.log(toRaw(taskList[index]))"
+        ></charge-task>
       </tbody>
     </v-table>
   </div>
@@ -23,26 +29,26 @@
 
 <script lang="ts" setup>
 import { Ref, ref, toRaw } from 'vue'
-import { ChargeTaskSetting } from '@/models/charge-task-setting.model'
+import { IChargeTask } from '@shared/charge-task.interface'
 import ChargeTask from '@/components/ChargeTask.vue'
 
-const taskList: Ref<ChargeTaskSetting[]> = ref([
+const taskList: Ref<IChargeTask[]> = ref([
   {
     id: 1,
     dateRelative: 0,
     mode: 'charge',
     power: 2000,
-    from: '22:10',
-    till: '23:00',
-  } as ChargeTaskSetting,
+    from: new Date(2023, 9, 20, 10, 0, 0),
+    till: new Date(2023, 9, 20, 12, 0, 0),
+  } as IChargeTask,
   {
     id: 2,
     dateRelative: 5,
     mode: 'discharge',
     power: 1200,
-    from: '2:00',
-    till: '4:00',
-  } as ChargeTaskSetting,
+    from: new Date(2023, 9, 21, 10, 30, 0),
+    till: new Date(2023, 9, 21, 12, 30, 0),
+  } as IChargeTask,
 ])
 </script>
 
@@ -52,7 +58,7 @@ const taskList: Ref<ChargeTaskSetting[]> = ref([
 }
 
 .table-container {
-  max-width: 1000px;
+  max-width: 1300px;
 }
 </style>
 @/models/charge-task.model

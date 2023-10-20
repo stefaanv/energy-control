@@ -12,17 +12,27 @@
     "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"],
+    "lib": [
+      "esnext",
+      "dom"
+    ],
     "types": [
       "node",
       "vuetify"
     ],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@shared/*": [
+        "src/shared-models/*"
+      ]
     },
   },
   "include": [
+    "src/shared-models/*",
     "src/**/*.ts",
+    "src/**/*.interface.ts",
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
