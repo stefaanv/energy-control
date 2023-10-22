@@ -37,12 +37,10 @@ function startEdit() {
   <td @click="startEdit">{{ format(task.from, 'HH:mm', TZ_OPTS) }}</td>
   <td @click="startEdit">{{ format(task.till, 'HH:mm', TZ_OPTS) }}</td>
   <td @click="startEdit">{{ task.power }}</td>
-  <td></td>
 </template>
 
 <style>
 td {
-  min-width: 200px;
   text-align: center;
 }
 </style>

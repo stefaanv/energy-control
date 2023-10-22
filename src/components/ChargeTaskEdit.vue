@@ -1,22 +1,10 @@
 <script setup lang="ts">
 import { ref, Ref } from 'vue'
-import { range } from 'radash'
 import { differenceInCalendarDays } from 'date-fns'
 import { IChargeTask } from '@/shared-models/charge-task.interface'
 import { ChargeMode, dateFromRelative } from '@/shared-models/charge-task-wire.interface'
-
-const DAY_NAMES: Record<string, string> = {
-  '-4': 'd-4',
-  '-3': 'd-3',
-  '-2': 'eergisteren',
-  '-1': 'gisteren',
-  '0': 'vandaag',
-  '1': 'morgen',
-  '2': 'overmorgen',
-  '3': 'd+3',
-  '4': 'd+4',
-  '5': 'd+5',
-}
+import { SELECT_HOURS, SELECT_MINUTES, DAY_NAMES } from './charge-task.constants'
+import { keys } from 'radash'
 
 const props = defineProps<{
   task: IChargeTask
@@ -27,12 +15,13 @@ const emit = defineEmits<{
 }>()
 
 // select fields content
-const hours = Array.from(range(0, 23)).map(h => h.toString())
-const minutes = Array.from(range(0, 11, i => 5 * i)).map(m => m.toString())
-const days = Array.from(range(-4, 5)).map(rd => ({
+const hours = SELECT_HOURS
+const minutes = SELECT_MINUTES
+const dayNames = keys(DAY_NAMES).map(rd => ({
   key: rd.toString(),
   title: DAY_NAMES[rd.toString()],
 }))
+
 
 //Variables when being edited
 const dateRelative = ref(differenceInCalendarDays(props.task.from, new Date()).toString())
@@ -61,7 +50,7 @@ const cancelUpdate = () => {
 
 <template>
   <td>
-    <v-select :items="days" density="compact" v-model="dateRelative" item-value="key" item-title="title" />
+    <v-select :items="dayNames" density="compact" v-model="dateRelative" item-value="key" item-title="title" />
   </td>
   <td>
     <v-select :items="['charge', 'discharge']" density="compact" v-model="mode" />
@@ -89,12 +78,12 @@ const cancelUpdate = () => {
 
 <style>
 td {
-  min-width: 200px;
+  /* min-width: 200px; */
   text-align: center;
 }
 
 td.icon {
-  min-width: 100px;
+  /* min-width: 100px; */
   text-align: left;
 }
 </style>
