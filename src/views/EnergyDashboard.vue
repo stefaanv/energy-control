@@ -31,8 +31,8 @@ import { IChargeTaskWire, chargeTaskFromWire } from '@/shared-models/charge-task
 const taskList: Ref<IChargeTask[]> = ref([])
 
 const axios = Axios.create({ baseURL: import.meta.env.VITE_BE_BASE_URL })
-const wireTaskList = (await axios.get<IChargeTaskWire[]>('energy/tasks')).data
-taskList.value = wireTaskList.map(t => chargeTaskFromWire(t))
+axios.get<IChargeTaskWire[]>('energy/tasks').then(res => taskList.value = res.data.map(t => chargeTaskFromWire(t)))
+
 
 /* Example data
 taskList.value = [
