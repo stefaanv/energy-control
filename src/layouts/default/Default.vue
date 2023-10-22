@@ -2,7 +2,9 @@
   <v-app>
     <default-bar />
 
-    <default-view />
+    <suspense>
+      <default-view />
+    </suspense>
   </v-app>
 </template>
 

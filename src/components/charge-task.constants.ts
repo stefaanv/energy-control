@@ -1,4 +1,4 @@
-import { keys, range } from 'radash'
+import { keys, range, sort } from 'radash'
 
 export const DAY_NAMES: Record<string, string> = {
   '-2': 'eergisteren',
@@ -14,7 +14,11 @@ export const NEW_ID = 999999
 // select fields content
 export const SELECT_HOURS = Array.from(range(0, 23)).map(h => h.toString())
 export const SELECT_MINUTES = Array.from(range(0, 11, i => 5 * i)).map(m => m.toString())
-export const SELECT_DAY_NAMES = keys(DAY_NAMES).map(rd => ({
-  key: rd.toString(),
-  title: DAY_NAMES[rd.toString()],
-}))
+export const SELECT_DAY_NAMES = sort(
+  keys(DAY_NAMES).map(rd => ({
+    key: rd,
+    title: DAY_NAMES[rd],
+  })),
+  kv => parseInt(kv.key),
+)
+console.log('SELECT_DAY_NAMES', SELECT_DAY_NAMES)

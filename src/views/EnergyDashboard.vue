@@ -13,7 +13,7 @@
           <th class="text-center" style="font-weight: 800">Van</th>
           <th class="text-center" style="font-weight: 800">Tot</th>
           <th class="text-center" style="font-weight: 800">Verm</th>
-          <th>actions</th>
+          <th>Acties</th>
         </tr>
       </thead>
       <tbody>
@@ -28,7 +28,7 @@
           <td>{{ task.power }} W</td>
           <td class="icons">
             <v-btn icon="$edit" class="mx-2" variant="text" density="compact" @click="startEdit(index)"></v-btn>
-            <v-btn icon="mdi-delete" class="mx-2" variant="text" density="compact"></v-btn>
+            <v-btn icon="mdi-delete" class="mx-2" variant="text" density="compact" @click="remove(index)"></v-btn>
           </td>
         </tr>
       </tbody>
@@ -40,7 +40,8 @@
     <v-form title="add/edit">
       <v-container>
         <v-col sm="4">
-          <v-row><v-select label="dag" :items="daySelectItems" v-model="dateRelative" /></v-row>
+          <v-row><v-select label="dag" :items="daySelectItems" v-model="dateRelative" item-value="key"
+              item-title="title" /></v-row>
           <v-row>
             <v-select label="van" :items="hours" icon="none" v-model="hourFrom" />
             <v-select label="min" :items="minutes" v-model="minutesFrom" />
@@ -55,8 +56,8 @@
         </v-col>
       </v-container>
     </v-form>
-    <v-btn variant="outlined" prepend-icon="mdi-check-circle" color="primary">Save</v-btn>
-    <v-btn variant="outlined" prepend-icon="$cancel" color="secondart">Cancel</v-btn>
+    <v-btn variant="outlined" prepend-icon="mdi-check-circle" color="primary" @click="update">Save</v-btn>
+    <v-btn variant="outlined" prepend-icon="$cancel" color="secondart" @click="cancel">Cancel</v-btn>
   </div>
 </template>
 <script lang="ts" setup>
@@ -83,25 +84,46 @@ const minutesTill = ref('0')
 const mode: Ref<ChargeMode> = ref('charge')
 const power = ref(0)
 
-
 const axios = Axios.create({ baseURL: import.meta.env.VITE_BE_BASE_URL })
-axios.get<IChargeTaskWire[]>('energy/tasks').then(res => taskList.value = res.data.map(t => chargeTaskFromWire(t)))
+// axios.get<IChargeTaskWire[]>('energy/tasks').then(res => taskList.value = res.data.map(t => chargeTaskFromWire(t)))
+const res = (await axios.get<IChargeTaskWire[]>('energy/tasks')).data
+taskList.value = res.map(t => chargeTaskFromWire(t))
 
-async function taskUpdated(index: number) {
-  const id = taskList.value[index].id
+async function update() {
+  const task = taskList.value[editing.value]
+  const id = task.id
+  task.from = dateFromRelative(dateRelative.value, hourFrom.value, minutesFrom.value)
+  task.till = dateFromRelative(dateRelative.value, hourTill.value, minutesTill.value)
+  task.power = parseInt(power.value.toString())
+  task.mode = mode.value
+
   if (id === NEW_ID) {
-    const result = await axios.put<string>(`energy/tasks/add`, taskList.value[index])
-    taskList.value[index].id = parseInt(result.data)
+    const result = await axios.put<string>(`energy/task/add`, task)
+    task.id = parseInt(result.data)
   } else {
-    axios.post(`energy/tasks/${id}`, taskList.value[index])
+    await axios.post(`energy/task/${id}`, task)
   }
   editing.value = -1
 }
+
+function cancel() {
+  editing.value = -1
+}
+
+async function remove(index: number) {
+  const toRemoveId = taskList.value[index].id
+  taskList.value.splice(index, 1)
+  await axios.delete(`energy/task/${toRemoveId}`)
+
+}
+
 
 function startEdit(index: number) {
   editing.value = index
   const task = taskList.value[index]
   dateRelative.value = differenceInCalendarDays(task.from, new Date()).toString()
+  console.log(dateRelative.value, typeof dateRelative.value)
+  console.log(daySelectItems)
   hourFrom.value = (task.from.getHours().toString())
   minutesFrom.value = (task.from.getMinutes().toString())
   hourTill.value = (task.till.getHours().toString())
@@ -110,21 +132,12 @@ function startEdit(index: number) {
   power.value = task.power
 }
 
-function update() {
-  const task = taskList.value[editing.value]
-  task.from = dateFromRelative(dateRelative.value, hourFrom.value, minutesFrom.value)
-  task.till = dateFromRelative(dateRelative.value, hourTill.value, minutesTill.value)
-  task.power = parseInt(power.value.toString())
-  task.mode = mode.value
-  editing.value = -1
-}
-
 const relDateString = (index: number) => {
   return DAY_NAMES[differenceInCalendarDays(taskList.value[index].from, new Date()).toString()]
 }
 
 function addNew() {
-  console.log(`new task added`)
+  console.log(`new task`)
   const tomorrow = addDays(new Date(), 1)
   const [year, month, day] = [tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate()]
   const newTask: IChargeTask = {
@@ -134,8 +147,9 @@ function addNew() {
     mode: 'charge',
     power: 2000
   }
+  const index = taskList.value.length
   taskList.value.push(newTask)
-  editing.value = NEW_ID
+  startEdit(index)
 }
 /* Example data
 taskList.value = [
