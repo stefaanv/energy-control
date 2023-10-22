@@ -27,12 +27,15 @@ import { Ref, ref, toRaw } from 'vue'
 import { IChargeTask } from '@/shared-models/charge-task.interface'
 import ChargeTask from '@/components/ChargeTask.vue'
 import Axios from 'axios';
+import { IChargeTaskWire, chargeTaskFromWire } from '@/shared-models/charge-task-wire.interface';
+const taskList: Ref<IChargeTask[]> = ref([])
 
 const axios = Axios.create({ baseURL: import.meta.env.VITE_BE_BASE_URL })
-const wireTaskLIst = await axios.get('energy/tasks')
-console.log(wireTaskLIst)
+const wireTaskList = (await axios.get<IChargeTaskWire[]>('energy/tasks')).data
+taskList.value = wireTaskList.map(t => chargeTaskFromWire(t))
 
-const taskList: Ref<IChargeTask[]> = ref([
+/* Example data
+taskList.value = [
   {
     id: 1,
     dateRelative: 0,
@@ -41,15 +44,8 @@ const taskList: Ref<IChargeTask[]> = ref([
     from: new Date(2023, 9, 20, 10, 0, 0),
     till: new Date(2023, 9, 20, 12, 0, 0),
   } as IChargeTask,
-  {
-    id: 2,
-    dateRelative: 5,
-    mode: 'discharge',
-    power: 1200,
-    from: new Date(2023, 9, 21, 10, 30, 0),
-    till: new Date(2023, 9, 21, 12, 30, 0),
-  } as IChargeTask,
-])
+]
+*/
 </script>
 
 <style scoped>
