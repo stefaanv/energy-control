@@ -21,4 +21,3 @@ export const SELECT_DAY_NAMES = sort(
   })),
   kv => parseInt(kv.key),
 )
-console.log('SELECT_DAY_NAMES', SELECT_DAY_NAMES)

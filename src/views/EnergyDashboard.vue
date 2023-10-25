@@ -101,7 +101,7 @@ async function update() {
     const result = await axios.put<string>(`energy/task/add`, task)
     task.id = parseInt(result.data)
   } else {
-    await axios.post(`energy/task/${id}`, task)
+    await axios.post(`energy/task`, task)
   }
   editing.value = -1
 }
@@ -122,8 +122,6 @@ function startEdit(index: number) {
   editing.value = index
   const task = taskList.value[index]
   dateRelative.value = differenceInCalendarDays(task.from, new Date()).toString()
-  console.log(dateRelative.value, typeof dateRelative.value)
-  console.log(daySelectItems)
   hourFrom.value = (task.from.getHours().toString())
   minutesFrom.value = (task.from.getMinutes().toString())
   hourTill.value = (task.till.getHours().toString())
@@ -137,7 +135,6 @@ const relDateString = (index: number) => {
 }
 
 function addNew() {
-  console.log(`new task`)
   const tomorrow = addDays(new Date(), 1)
   const [year, month, day] = [tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate()]
   const newTask: IChargeTask = {
