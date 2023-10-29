@@ -1,4 +1,5 @@
 <template>
+  <price-table />
   <div class="table-container">
     <v-table density="compact">
       <thead>
@@ -18,9 +19,6 @@
       </thead>
       <tbody>
         <tr v-for="(task, index) of taskList" v-bind:key="index">
-          <!-- <charge-task v-if="task.id !== editing" v-model:task="taskList[index]" @edit="editing = task.id"></charge-task> -->
-          <!-- <charge-task-edit v-if="task.id === editing" v-model:task="taskList[index]" @update:task="taskUpdated(index)"
-            @cancel="editing = -1"></charge-task-edit> -->
           <td>{{ relDateString(index) }}</td>
           <td>{{ task.mode }}</td>
           <td>{{ format(task.from, 'HH:mm', TZ_OPTS) }}</td>
@@ -36,14 +34,14 @@
     <v-btn v-if="editing < 0" icon="$plus" @click="addNew"></v-btn>
   </div>
 
-  <div class="form-container" v-if="editing > 0">
+  <div class="form-container" v-if="editing >= 0">
     <v-form title="add/edit">
       <v-container>
         <v-col sm="4">
           <v-row><v-select label="dag" :items="daySelectItems" v-model="dateRelative" item-value="key"
               item-title="title" /></v-row>
           <v-row>
-            <v-select label="van" :items="hours" icon="none" v-model="hourFrom" />
+            <v-select label="van" :items="hours" icon="none" v-model="hourFrom" @update:model-value="fromUpdated" />
             <v-select label="min" :items="minutes" v-model="minutesFrom" />
           </v-row>
           <v-row>
@@ -64,6 +62,7 @@
 import { Ref, ref } from 'vue'
 import { ChargeMode, IChargeTask } from '@/shared-models/charge-task.interface'
 import Axios from 'axios'
+import PriceTable from '@/components/PriceTable.vue'
 import { IChargeTaskWire, chargeTaskFromWire, dateFromRelative } from '@/shared-models/charge-task-wire.interface'
 import { addDays, differenceInCalendarDays } from 'date-fns'
 import { format, OptionsWithTZ } from 'date-fns-tz'
@@ -85,7 +84,6 @@ const mode: Ref<ChargeMode> = ref('charge')
 const power = ref(0)
 
 const axios = Axios.create({ baseURL: import.meta.env.VITE_BE_BASE_URL })
-// axios.get<IChargeTaskWire[]>('energy/tasks').then(res => taskList.value = res.data.map(t => chargeTaskFromWire(t)))
 const res = (await axios.get<IChargeTaskWire[]>('energy/tasks')).data
 taskList.value = res.map(t => chargeTaskFromWire(t))
 
@@ -117,6 +115,9 @@ async function remove(index: number) {
 
 }
 
+function fromUpdated() {
+  hourTill.value = Math.min(parseInt(hourFrom.value) + 2, 23).toString()
+}
 
 function startEdit(index: number) {
   editing.value = index
