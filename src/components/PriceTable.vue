@@ -32,21 +32,13 @@ import { parseJSON, differenceInHours } from 'date-fns'
 import { cluster, range } from 'radash'
 
 const axios = Axios.create({ baseURL: import.meta.env.VITE_BE_BASE_URL })
+const now = new Date()
+const startHour = now.getHours() - (now.getHours() % 8)
 const priceData = (await axios.get<PricePointWire[]>('pricing')).data
   .map<PricePoint>(pp => ({ ...pp, startTime: parseJSON(pp.startTime), col: 0 }))
+  .filter(pp => pp.startTime.getDate() != now.getDate() || pp.startTime.getHours() >= startHour)
   .map(pp => ({ ...pp, col: pp.startTime.getHours() % 8, hrStart: pp.startTime.getHours().toString() }))
   .sort((a, b) => differenceInHours(a.startTime, b.startTime))
-console.log(priceData)
-const firstCol = priceData[0].col
-if (firstCol > 0) {
-  const toAdd = Array.from(range(0, firstCol - 1)).map(col => ({
-    price: 0,
-    startTime: new Date(),
-    hrStart: '',
-    col
-  }))
-  priceData.unshift(...toAdd)
-}
 const clustered = ref(cluster(priceData, 8))
 </script>
 
