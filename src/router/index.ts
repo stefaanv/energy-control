@@ -23,4 +23,8 @@ const router = createRouter({
   routes,
 })
 
+router.beforeEach((to, from) =>
+  console.log(`Route changed from "${from.fullPath}" to "${to.fullPath}"`),
+)
+
 export default router
